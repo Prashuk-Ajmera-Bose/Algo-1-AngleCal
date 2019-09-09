@@ -25,7 +25,7 @@ class InterfaceController: WKInterfaceController {
         // Configure interface objects here.
         
         if manager.isDeviceMotionAvailable {
-            manager.deviceMotionUpdateInterval = 0.01
+            manager.deviceMotionUpdateInterval = 1
             manager.startDeviceMotionUpdates(to: .main) {
                 [weak self] (data, error) in
 
@@ -33,27 +33,25 @@ class InterfaceController: WKInterfaceController {
                     return
                 }
 
-//                let value = atan(data.gravity.x)  * 180 / 3.14
-//                let angle = atan(value)
-                
                 let rotationX = atan(data.gravity.x) * 360 / Double.pi
                 let rotationY = atan(data.gravity.y) * 360 / Double.pi
                 let rotationZ = atan(data.gravity.z) * 360 / Double.pi
                 
+                print(rotationX)
+                
                 if self!.flag == 1 {
                     if rotationX > 70 && rotationX < 80 {
                         print("Song Pause")
-//                        self!.manager.stopDeviceMotionUpdates()
                         self!.flag = 0
                     }
                 }
                 
-//                if self!.flag == 0 {
-//                    if rotationX < 10 && rotationX > 0 {
-//                        print("Song Play")
-//                        self!.flag = 1
-//                    }
-//                }
+                if self!.flag == 0 {
+                    if rotationX < -70 && rotationX > -80 {
+                        print("Song Play")
+                        self!.flag = 1
+                    }
+                }
             }
         }
         
@@ -70,7 +68,10 @@ class InterfaceController: WKInterfaceController {
         // This method is called when watch view controller is no longer visible
         super.didDeactivate()
     }
+
+    // Test Code
     
+/*
     func startUpadateAccelerometer() {
             self.manager.deviceMotionUpdateInterval = 1.0 / 10.0
             self.manager.startDeviceMotionUpdates(to: OperationQueue()) { (accelerometerData, error) -> Void in
@@ -94,23 +95,23 @@ class InterfaceController: WKInterfaceController {
 //                            self.m_XYZValueLbl.setText(self.logString)
 
                             self.is_RechedZeroPos = true
-//                            self.session?.sendMessage(["msg" : "\(self.logString)"], replyHandler: nil) { (error) in
-//                                NSLog("%@", "Error sending message: \(error)")
-//                            }
+                            self.session?.sendMessage(["msg" : "\(self.logString)"], replyHandler: nil) { (error) in
+                                NSLog("%@", "Error sending message: \(error)")
+                            }
 
                         } else {
-//                            if(self.checkAchievements2_3(deviceMotionData: accelerometerData!.userAcceleration) == true) {
-//                                if self.is_RechedZeroPos == true {
-////                                    self.addLog(_logStr: EventsTypes.Achievements2.rawValue)
-//                                    self.is_RechedZeroPos = false
-//                                } else {
-////                                    self.addLog(_logStr: EventsTypes.Achievements3.rawValue)
-//                                }
-//                            }
+                            if(self.checkAchievements2_3(deviceMotionData: accelerometerData!.userAcceleration) == true) {
+                                if self.is_RechedZeroPos == true {
+//                                    self.addLog(_logStr: EventsTypes.Achievements2.rawValue)
+                                    self.is_RechedZeroPos = false
+                                } else {
+//                                    self.addLog(_logStr: EventsTypes.Achievements3.rawValue)
+                                }
+                            }
                         }
                     } else {
-//                        self.gravityReference = accelerometerData!.acceleration
-                        //self.logString = String(format: "Reference Acceleration   %0.3f   %0.3f   %0.3f  \n", self.gravityReference.x,self.gravityReference.y,self.gravityReference.z)
+                        self.gravityReference = accelerometerData!.acceleration
+                        self.logString = String(format: "Reference Acceleration   %0.3f   %0.3f   %0.3f  \n", self.gravityReference.x,self.gravityReference.y,self.gravityReference.z)
                         self.can_reset = true
                     }
                 }
@@ -145,5 +146,7 @@ class InterfaceController: WKInterfaceController {
                return false
            }
        }
-
+*/
+    
+    
 }
