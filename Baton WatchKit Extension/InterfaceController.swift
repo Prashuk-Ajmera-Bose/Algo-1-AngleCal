@@ -17,27 +17,47 @@ class InterfaceController: WKInterfaceController {
     var logString = ""
     var is_RechedZeroPos = true
     
+    var flag = 1
+    
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
         
         // Configure interface objects here.
         
-//        if manager.isDeviceMotionAvailable {
-//            manager.deviceMotionUpdateInterval = 1
-//            manager.startDeviceMotionUpdates(to: .main) {
-//                [weak self] (data, error) in
-//
-//                guard let data = data, error == nil else {
-//                    return
+        if manager.isDeviceMotionAvailable {
+            manager.deviceMotionUpdateInterval = 0.01
+            manager.startDeviceMotionUpdates(to: .main) {
+                [weak self] (data, error) in
+
+                guard let data = data, error == nil else {
+                    return
+                }
+
+//                let value = atan(data.gravity.x)  * 180 / 3.14
+//                let angle = atan(value)
+                
+                let rotationX = atan(data.gravity.x) * 360 / Double.pi
+                let rotationY = atan(data.gravity.y) * 360 / Double.pi
+                let rotationZ = atan(data.gravity.z) * 360 / Double.pi
+                
+                if self!.flag == 1 {
+                    if rotationX > 70 && rotationX < 80 {
+                        print("Song Pause")
+//                        self!.manager.stopDeviceMotionUpdates()
+                        self!.flag = 0
+                    }
+                }
+                
+//                if self!.flag == 0 {
+//                    if rotationX < 10 && rotationX > 0 {
+//                        print("Song Play")
+//                        self!.flag = 1
+//                    }
 //                }
-//
-//                let value = atan2(data.gravity.x, data.gravity.y)
-//                let angle = atan(value) * 180 / 3.14
-//                print("Value: \(value) Angle: \(angle)")
-//            }
-//        }
+            }
+        }
         
-        startUpadateAccelerometer()
+//        startUpadateAccelerometer()
         
     }
     
