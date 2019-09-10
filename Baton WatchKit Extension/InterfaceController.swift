@@ -12,20 +12,18 @@ import CoreMotion
 
 class InterfaceController: WKInterfaceController {
 
+    // Variables
     let manager = CMMotionManager()
-    var can_reset = true
-    var logString = ""
-    var is_RechedZeroPos = true
     
-    var flag = 1
+    var flagV = 1
+    var flagP = 1
     
     override func awake(withContext context: Any?) {
         super.awake(withContext: context)
         
-        // Configure interface objects here.
-        
+        // Device Motion
         if manager.isDeviceMotionAvailable {
-            manager.deviceMotionUpdateInterval = 1
+            manager.deviceMotionUpdateInterval = 0.01
             manager.startDeviceMotionUpdates(to: .main) {
                 [weak self] (data, error) in
 
@@ -33,120 +31,59 @@ class InterfaceController: WKInterfaceController {
                     return
                 }
 
-                let rotationX = atan(data.gravity.x) * 360 / Double.pi
-                let rotationY = atan(data.gravity.y) * 360 / Double.pi
-                let rotationZ = atan(data.gravity.z) * 360 / Double.pi
+                // Calculating angle of watch w.r.t to earth
+//                let rotationX = atan(data.gravity.x) * 360 / Double.pi
+                let rotationX = data.attitude.pitch * 180 / .pi
+//                let rotationY = atan(data.gravity.y) * 360 / Double.pi
+                let rotationY = data.attitude.roll * 180 / .pi
+//                let rotationZ = atan(data.gravity.z) * 360 / Double.pi
+//                let rotationZ = data.attitude.yaw * 180 / .pi
                 
-                print(rotationX)
-                
-                if self!.flag == 1 {
-                    if rotationX > 70 && rotationX < 80 {
-                        print("Song Pause")
-                        self!.flag = 0
+                if self!.flagV == 1 {
+                    if rotationY > 35 && rotationY < 45 {
+                        print("Volume Decrease")
+                        self!.flagV = 0
                     }
                 }
                 
-                if self!.flag == 0 {
-                    if rotationX < -70 && rotationX > -80 {
-                        print("Song Play")
-                        self!.flag = 1
+                if self!.flagV == 0 {
+                    if rotationY < -35 && rotationY > -45 {
+                        print("Volume Increase")
+                        self!.flagV = 1
                     }
                 }
+                
+                if self!.flagP == 1 {
+                    if rotationX > -90 && rotationX < -80 {
+                        print("Music Pause")
+                        self!.flagP = 0
+                    }
+                }
+                
+                if self!.flagP == 0 {
+                    if rotationX > 80 && rotationX < 90 {
+                        print("Music Play")
+                        self!.flagP = 1
+                    }
+                }
+                
+//                print(rotationX)
+//                print(rotationY)
+
             }
         }
-        
-//        startUpadateAccelerometer()
-        
     }
     
     override func willActivate() {
         // This method is called when watch view controller is about to be visible to user
         super.willActivate()
+        
     }
     
     override func didDeactivate() {
         // This method is called when watch view controller is no longer visible
         super.didDeactivate()
+        
     }
 
-    // Test Code
-    
-/*
-    func startUpadateAccelerometer() {
-            self.manager.deviceMotionUpdateInterval = 1.0 / 10.0
-            self.manager.startDeviceMotionUpdates(to: OperationQueue()) { (accelerometerData, error) -> Void in
-                guard accelerometerData != nil else
-                {
-                    print("There was an error: \(String(describing: error))")
-                    return
-                }
-
-                DispatchQueue.main.async {
-                    if(self.can_reset){
-                        let differenceX : Bool = self.validateButtom(currentValue: accelerometerData!.userAcceleration.x, inititalValue: accelerometerData!.gravity.x)
-                        let differenceY : Bool = self.validateButtom(currentValue: accelerometerData!.userAcceleration.y, inititalValue: accelerometerData!.gravity.y)
-
-                        if(differenceX && differenceY && self.gravityOffsetDifference(currentValue: accelerometerData!.userAcceleration.x, referenceValue: accelerometerData!.userAcceleration.x ) && self.gravityOffsetDifference(currentValue: accelerometerData!.userAcceleration.y, referenceValue: accelerometerData!.gravity.y)){
-                            WKInterfaceDevice().play(.success)
-//                            self.addLog(_logStr: EventsTypes.Achievements1.rawValue)
-
-                            self.logString += String(format: "X: %0.3f Y: %0.3f Z: %0.3f  \n", accelerometerData!.userAcceleration.x, accelerometerData!.userAcceleration.y,accelerometerData!.userAcceleration.z)
-                            print(self.logString)
-//                            self.m_XYZValueLbl.setText(self.logString)
-
-                            self.is_RechedZeroPos = true
-                            self.session?.sendMessage(["msg" : "\(self.logString)"], replyHandler: nil) { (error) in
-                                NSLog("%@", "Error sending message: \(error)")
-                            }
-
-                        } else {
-                            if(self.checkAchievements2_3(deviceMotionData: accelerometerData!.userAcceleration) == true) {
-                                if self.is_RechedZeroPos == true {
-//                                    self.addLog(_logStr: EventsTypes.Achievements2.rawValue)
-                                    self.is_RechedZeroPos = false
-                                } else {
-//                                    self.addLog(_logStr: EventsTypes.Achievements3.rawValue)
-                                }
-                            }
-                        }
-                    } else {
-                        self.gravityReference = accelerometerData!.acceleration
-                        self.logString = String(format: "Reference Acceleration   %0.3f   %0.3f   %0.3f  \n", self.gravityReference.x,self.gravityReference.y,self.gravityReference.z)
-                        self.can_reset = true
-                    }
-                }
-            }
-        }
-    
-    func validateButtom(currentValue : Double , inititalValue : Double) -> Bool {
-           if( currentValue == 0 && inititalValue == 0) {
-               return true
-           } else if( currentValue < 0 && inititalValue < 0) {
-               return true
-           } else if( currentValue > 0 && inititalValue > 0) {
-               return true
-           } else {
-               return false
-           }
-       }
-
-
-
-    func gravityOffsetDifference(currentValue : Double , referenceValue: Double) -> Bool {
-           var difference : Double!
-           if (fabs(currentValue) <= fabs(referenceValue)) {
-               difference = fabs(referenceValue) - fabs(currentValue)
-           } else {
-               difference = fabs(currentValue) - fabs(referenceValue)
-           }
-
-        if (difference <= 9.8 ) {
-               return true
-           } else {
-               return false
-           }
-       }
-*/
-    
-    
 }
